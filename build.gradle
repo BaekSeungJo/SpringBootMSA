@@ -1,0 +1,64 @@
+// Cross project configuration ( multi module project 를 Root project 에 위치한 build.gradle 에서 정의 )
+// https://plugins.gradle.org/plugin/org.springframework.boot ( 최신 버전의 플러그인 설정 )
+plugins {
+    // Spring Boot dependency 관리 및 Gradle 를 빌드 도구로 사용하여 Application 패키징 가능하도록 함
+    id 'org.springframework.boot' version '3.0.6'
+    // 실행 가능한 jar 파일을 생성 하는 플러그인 적용
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+bootJar.enabled = false
+
+// settings.gradle 에 include 된 프로젝트를 전부 관리
+subprojects {
+    group 'com.sjbaek'
+    version '1.0-SNAPSHOT' + new Date().format('yyyyMMddHHmmss')
+    sourceCompatibility = '17'
+
+    apply plugin: 'java'
+    // build.gradle 에서 api() 를 사용하려면 java-library 사용
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    // spring boot dependency 를 사용하여 사용중인 부트 버전에서 자동으로 의존성을 가져옴
+    apply plugin: 'io.spring.dependency-management'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    // 관리하는 모듈에서 사용할 공통 dependencies
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-devtools'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    // build 시 profile 옵션이 빠졌을시 자동으로 local 로 셋팅 -> 해당 ide 에서 따로 셋팅할 필요 없음
+    ext.profile = (!project.hasProperty('profile') || !profile) ? 'local' : profile
+
+    // resources-* 를 전체 제외 시키고 필요한 resources-${profile} 만 빌드에 포함시킨다.
+    sourceSets {
+        main {
+            resources {
+                srcDirs "src/main/resources/-resources-${profile}"
+                exclude "resources-*"
+            }
+        }
+    }
+}
