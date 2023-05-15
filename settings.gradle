@@ -1,3 +1,4 @@
 rootProject.name = 'spring-boot-msa'
 include 'chapter3'
+include 'chapter4'
 

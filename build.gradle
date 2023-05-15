@@ -56,7 +56,7 @@ subprojects {
     sourceSets {
         main {
             resources {
-                srcDirs "src/main/resources/-resources-${profile}"
+                srcDirs "src/main/resources/resources-${profile}"
                 exclude "resources-*"
             }
         }
